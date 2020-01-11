@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Model\UserModel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redis;
 
 class UserController extends Controller
 {
@@ -151,7 +152,10 @@ class UserController extends Controller
             }
         }
 
-        $token =  $this->getToken($uid);
+        $token =  $this->getToken($uid);        //生成token
+        $redis_token_key = 'str:user:token:'.$uid;
+        //echo $redis_token_key;
+        Redis::set($redis_token_key,$token,86400);  // 生成token  设置过期时间
 
         $response = [
             'errno' => 0,
@@ -180,9 +184,42 @@ class UserController extends Controller
     /**
      * 获取用户信息接口
      */
-    public function userInfo()
+    public function showTime()
     {
-        echo '<pre>';print_r($_GET);echo '</pre>';
 
+        if(empty($_SERVER['HTTP_TOKEN']) || empty($_SERVER['HTTP_UID']))
+        {
+            $response = [
+                'errno' => 40003,
+                'msg'   => 'Token Not Valid!'
+            ];
+            return $response;
+        }
+
+        //获取客户端的 token
+        $token = $_SERVER['HTTP_TOKEN'];
+        $uid = $_SERVER['HTTP_UID'];
+
+        $redis_token_key = 'str:user:token:'.$uid;
+
+        //验证token是否有效
+        $cache_token = Redis::get($redis_token_key);
+
+        if($token==$cache_token)        // token 有效
+        {
+            $data = date("Y-m-d H:i:s");
+            $response = [
+                'errno' => 0,
+                'msg'   => 'ok',
+                'data'  => $data
+            ];
+        }else{
+            $response = [
+                'errno' => 40003,
+                'msg'   => 'Token Not Valid!'
+            ];
+        }
+
+        return $response;
     }
 }
