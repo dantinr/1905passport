@@ -22,8 +22,12 @@ class UserController extends Controller
         //验证两次输入的密码
         if($pass1 != $pass2)
         {
-            echo "两次输入的密码不一致";
-            die;
+            $response = [
+                'errno' => 500002,
+                'msg'   => "两次输入的密码不一致"
+            ];
+
+            die(json_encode($response,JSON_UNESCAPED_UNICODE));
         }
 
         $name = $request->input('name');
@@ -98,8 +102,7 @@ class UserController extends Controller
     public function login(Request $request)
     {
         //echo '<pre>';print_r($_POST);echo '</pre>';
-
-        $value = $request->input('name');
+        $value = $request->input('name');       // user_name  EMAIL  mobile
         $pass = $request->input('pass');
         // 按name找记录
         $u1 = UserModel::where(['name'=>$value])->first();
@@ -187,11 +190,12 @@ class UserController extends Controller
     public function showTime()
     {
 
+        //echo '<pre>';print_r($_SERVER);echo '</pre>';die;
         if(empty($_SERVER['HTTP_TOKEN']) || empty($_SERVER['HTTP_UID']))
         {
             $response = [
                 'errno' => 40003,
-                'msg'   => 'Token Not Valid!'
+                'msg'   => 'Need token or uid'
             ];
             return $response;
         }
@@ -220,6 +224,42 @@ class UserController extends Controller
             ];
         }
 
+        return $response;
+    }
+
+    /**
+     * 接口鉴权
+     */
+    public function auth()
+    {
+        $uid = $_POST['uid'];
+        $token = $_POST['token'];
+
+        if(empty($_POST['uid']) || empty($_POST['token'])){
+            $response = [
+                'errno' => 40003,
+                'msg'   => 'Need token or uid'
+            ];
+            return $response;
+        }
+
+        $redis_token_key = 'str:user:token:'.$uid;
+
+        //验证token是否有效
+        $cache_token = Redis::get($redis_token_key);
+
+        if($token==$cache_token)        // token 有效
+        {
+            $response = [
+                'errno' => 0,
+                'msg'   => 'ok'
+            ];
+        }else{
+            $response = [
+                'errno' => 40003,
+                'msg'   => 'Token Not Valid!'
+            ];
+        }
         return $response;
     }
 }
