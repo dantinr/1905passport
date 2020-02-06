@@ -15,6 +15,11 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+///////////////////////// TEST ////////////////////////////
+Route::get('/test/check','TestController@md5test');     //注册
+
+///////////////////////// TEST ////////////////////////////
+
 Route::post('/api/user/reg','User\UserController@reg');     //注册
 Route::post('/api/user/login','User\UserController@login'); // 登录
 Route::get('/api/show/time','User\UserController@showTime'); // 获取数据
