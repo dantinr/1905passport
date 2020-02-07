@@ -17,6 +17,7 @@ Route::get('/', function () {
 
 ///////////////////////// TEST ////////////////////////////
 Route::get('/test/check','TestController@md5test');     //注册
+Route::post('/test/check2','TestController@check2'); 	// 验证签名
 
 ///////////////////////// TEST ////////////////////////////
 
