@@ -19,6 +19,8 @@ Route::get('/', function () {
 Route::get('/test/check','TestController@md5test');     //注册
 Route::post('/test/check2','TestController@check2'); 	// 验证签名
 
+Route::post('/test/decrypt2','TestController@decrypt2'); 	// 非对称解密
+
 ///////////////////////// TEST ////////////////////////////
 
 Route::post('/api/user/reg','User\UserController@reg');     //注册
